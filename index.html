@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,20 +14,22 @@
     <span>Score: </span><span id="scoreEl">0</span>
 </div>
 
-<div class = "modalWindow" id = "modalEl">
-    <div class = "background">
-        <h1 class = "text" id = "bigScoreEl">0</h1>
-        <p class = "points">Points</p>
-        <div>
-            <button class = "button" id = "startGameBtn">Start Game</button>
-        </div>
-    </div>
+<div class = "modal" id = "modalEl">
+    <label class = "gameOver">Game Over</label>
+    <h1 class = "modalScore" id = "modalScoreEl">0</h1>
+    <p class = "points">Points</p>
+    <button class = "restartBtn" id = "restartBtnEl">Restart Game</button>
+</div>
+
+<div class = "startModal" id = "startModalEl">
+    <h1 class = "titleGame" id = "titleGameEl" >Defense Game</h1>
+    <button class = "startBtn" id = "startBtnEl">Start</button>
 </div>
 
 
 
 <canvas></canvas>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.2/gsap.min.js"></script>
 <script src="index.js"></script>
 
 </body>

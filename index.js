@@ -1,14 +1,17 @@
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
+const scoreEl = document.querySelector('#scoreEl');
+const modalEl = document.querySelector('#modalEl');
+
+const modalScoreEl = document.querySelector('#modalScoreEl');
+const restartBtnEl = document.querySelector('#restartBtnEl');
+
+const startModalEl = document.querySelector('#startModalEl');
+const startBtnEl = document.querySelector('#startBtnEl');
+
 canvas.width = innerWidth;
 canvas.height = innerHeight;
-
-const scoreEl = document.querySelector('#scoreEl');
-const startGameBtn = document.querySelector('#startGameBtn');
-const modalEl = document.querySelector('#modalEl');
-const bigScoreEl = document.querySelector('#bigScoreEl');
-
 
 class Player {
     constructor(x, y, radius, color) {
@@ -35,7 +38,6 @@ class Projectile {
         this.velocity = velocity;
     }
 
-
     draw() {
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
@@ -59,7 +61,6 @@ class Enemy {
         this.velocity = velocity;
     }
 
-
     draw() {
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
@@ -75,7 +76,6 @@ class Enemy {
 }
 
 const friction = 0.99;
-
 class Particle {
     constructor(x, y, radius, color, velocity) {
         this.x = x;
@@ -110,11 +110,13 @@ class Particle {
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 
-
 let player = new Player(x, y, 10, 'white');
 let projectiles = [];
 let enemies = [];
 let particles = [];
+let animationId;
+let intervalId;
+let score = 0;
 
 function init() {
     player = new Player(x, y, 10, 'white');
@@ -123,11 +125,10 @@ function init() {
     particles = [];
     score = 0;
     scoreEl.innerHTML = score;
-    bigScoreEl.innerHTML = score;
 }
 
 function spawnEnemies() {
-    setInterval(() => {
+    intervalId = setInterval(() => {
         const radius = Math.random() * (30 - 4) + 4;
 
         let x;
@@ -143,7 +144,6 @@ function spawnEnemies() {
 
         const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
-
         const angle = Math.atan2(canvas.height / 2 - y,
             canvas.width / 2 - x)
 
@@ -157,17 +157,15 @@ function spawnEnemies() {
     }, 1000)
 }
 
-
-let animationId;
-let score = 0;
-
 function animate() {
     animationId = requestAnimationFrame(animate);
 
     // эффект затухания для объектов
     context.fillStyle = 'rgba(0, 0, 0, 0.1)';
     context.fillRect(0, 0, canvas.width, canvas.height);
+
     player.draw();
+
     particles.forEach((particle, index) => {
         if (particle.alpha <= 0) {
             particles.splice(index, 1);
@@ -175,6 +173,7 @@ function animate() {
             particle.update();
         }
     });
+
     projectiles.forEach((projectile, index) => {
         projectile.update();
 
@@ -198,8 +197,14 @@ function animate() {
         // конец игры
         if (distance - enemy.radius - player.radius < 1) {
             cancelAnimationFrame(animationId);
-            modalEl.style.display = 'flex';
-            bigScoreEl.innerHTML = score;
+            clearInterval(intervalId);
+
+            modalEl.style.display = 'block';
+            gsap.fromTo('#modalEl', {scale: 0.8, opacity: 0}, {
+                scale: 1, opacity: 1,
+                ease: 'expo'
+            });
+            modalScoreEl.innerHTML = score;
         }
 
         projectiles.forEach((projectile, projectileIndex) => {
@@ -266,10 +271,37 @@ addEventListener('click', (event) => {
     )
 });
 
-startGameBtn.addEventListener('click', () => {
+
+// restart
+restartBtnEl.addEventListener('click', () => {
     init();
-    spawnEnemies();
     animate();
-    modalEl.style.display = 'none';
+    spawnEnemies();
+    gsap.to('#restartModalEl', {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.2,
+        ease: 'expo.out',
+        onComplete: () => {
+            modalEl.style.display = 'none';
+        }
+    })
 })
+
+startBtnEl.addEventListener('click', () => {
+    init();
+    animate();
+    spawnEnemies();
+    // startModalEl.style.display = 'none';
+    gsap.to('#startModalEl', {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.2,
+        ease: 'expo.out',
+        onComplete: () => {
+            startModalEl.style.display = 'none';
+        }
+    })
+})
+
 
