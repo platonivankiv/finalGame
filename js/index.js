@@ -11,10 +11,10 @@ import {
     START_BTN_EL,
 } from './constants.js'
 
-import { Player } from './Player.js'
-import { Shot } from './Shot.js'
-import { Enemy } from './Enemy.js'
-import { Particle } from './Particle.js'
+import {Player} from './Player.js'
+import {Shot} from './Shot.js'
+import {Enemy} from './Enemy.js'
+import {Particle} from './Particle.js'
 
 CANVAS.width = innerWidth;
 CANVAS.height = innerHeight;
@@ -29,6 +29,27 @@ let particles = [];
 let animationId;
 let intervalId;
 let score = 0;
+let playWorking = true;
+
+
+function shotAudioPlay() {
+    let SHOT_AUDIO = new Audio('./audio/shotAudio.mp3')
+    SHOT_AUDIO.play();
+    SHOT_AUDIO.volume = 0.5;
+
+}
+
+function hitAudioPlay() {
+    let HIT_AUDIO = new Audio('./audio/hitAudio.mp3')
+    HIT_AUDIO.play();
+    HIT_AUDIO.volume = 0.5;
+}
+
+function killAudioPlay() {
+    let KILL_AUDIO = new Audio('./audio/killAudio.mp3');
+    KILL_AUDIO.play();
+    KILL_AUDIO.volume = 0.5;
+}
 
 function init() {
     player = new Player(x, y, 10, 'white');
@@ -70,6 +91,11 @@ function createEnemies() {
 }
 
 function animate() {
+    // let MUSIC = new Audio('./audio/music.mp3');
+    // MUSIC.play();
+    // MUSIC.loop = true;
+    // MUSIC.volume = 0.01;
+    playWorking = true;
     animationId = requestAnimationFrame(animate);
 
     // эффект затухания для объектов
@@ -95,7 +121,7 @@ function animate() {
             shot.y + shot.radius < 0 ||
             shot.y - shot.radius > CANVAS.height) {
             setTimeout(() => {
-                shot.splice(index, 1);
+                shots.splice(index, 1);
             }, 0)
         }
     })
@@ -108,6 +134,7 @@ function animate() {
 
         // конец игры
         if (distance - enemy.radius - player.radius < 1) {
+            playWorking = false;
             cancelAnimationFrame(animationId);
             clearInterval(intervalId);
 
@@ -152,18 +179,19 @@ function animate() {
                         shots.splice(shotIndex, 1);
                     }, 0);
 
-                } else {
+                    hitAudioPlay();
 
+                } else {
                     // увеличение счета при полном уничтожении врага
                     score += 250;
                     SCORE_EL.innerHTML = score;
+                    killAudioPlay();
 
                     setTimeout(() => {
                         enemies.splice(index, 1);
                         shots.splice(shotIndex, 1);
                     }, 0);
                 }
-
             }
         })
     })
@@ -181,6 +209,9 @@ addEventListener('click', (event) => {
     shots.push(new Shot(CANVAS.width / 2, CANVAS.height / 2,
         5, 'white', velocity)
     )
+    if (playWorking) {
+        shotAudioPlay();
+    }
 });
 
 
