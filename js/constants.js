@@ -7,5 +7,6 @@ export const RESTART_BTN_EL = document.querySelector('#restartBtnEl');
 export const START_MODAL_EL = document.querySelector('#startModalEl');
 export const START_BTN_EL = document.querySelector('#startBtnEl');
 export const FRICTION = 0.99;
-
+export const RADIUS = 10;
+export const COLOR = 'white';
 

@@ -1,24 +1,26 @@
 import {CONTEXT} from "./constants.js";
 
 export class Shot {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
+    constructor(velocity, playerX, playerY) {
+        this.position = {
+            x: playerX,
+            y: playerY,
+        }
         this.velocity = velocity;
+        this.radius = 5;
+        this.color = 'white';
     }
 
     create() {
         CONTEXT.beginPath();
-        CONTEXT.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        CONTEXT.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, false);
         CONTEXT.fillStyle = this.color;
         CONTEXT.fill();
     }
 
     update() {
         this.create();
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
+        this.position.x = this.position.x + this.velocity.x;
+        this.position.y = this.position.y + this.velocity.y;
     }
 }

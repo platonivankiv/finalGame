@@ -15,14 +15,12 @@ import {Player} from './Player.js'
 import {Shot} from './Shot.js'
 import {Enemy} from './Enemy.js'
 import {Particle} from './Particle.js'
+import {shotAudioPlay, hitAudioPlay, killAudioPlay, failAudioPlay} from "./audio.js";
 
 CANVAS.width = innerWidth;
 CANVAS.height = innerHeight;
 
-const x = CANVAS.width / 2;
-const y = CANVAS.height / 2;
-
-let player = new Player(x, y, 10, 'white');
+let player = new Player();
 let shots = [];
 let enemies = [];
 let particles = [];
@@ -32,27 +30,8 @@ let score = 0;
 let playWorking = true;
 
 
-function shotAudioPlay() {
-    let SHOT_AUDIO = new Audio('./audio/shotAudio.mp3')
-    SHOT_AUDIO.play();
-    SHOT_AUDIO.volume = 0.5;
-
-}
-
-function hitAudioPlay() {
-    let HIT_AUDIO = new Audio('./audio/hitAudio.mp3')
-    HIT_AUDIO.play();
-    HIT_AUDIO.volume = 0.5;
-}
-
-function killAudioPlay() {
-    let KILL_AUDIO = new Audio('./audio/killAudio.mp3');
-    KILL_AUDIO.play();
-    KILL_AUDIO.volume = 0.5;
-}
-
 function init() {
-    player = new Player(x, y, 10, 'white');
+    player = new Player();
     shots = [];
     enemies = [];
     particles = [];
@@ -85,7 +64,6 @@ function createEnemies() {
             y: Math.sin(angle)
         }
 
-
         enemies.push(new Enemy(x, y, radius, color, velocity))
     }, 1000)
 }
@@ -103,6 +81,7 @@ function animate() {
     CONTEXT.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
     player.create();
+    player.update();
 
     particles.forEach((particle, index) => {
         if (particle.alpha <= 0) {
@@ -116,10 +95,10 @@ function animate() {
         shot.update();
 
         // удаление выстрелов при выходе за края экрана
-        if (shot.x + shot.radius < 0 ||
-            shot.x - shot.radius > CANVAS.width ||
-            shot.y + shot.radius < 0 ||
-            shot.y - shot.radius > CANVAS.height) {
+        if (shot.position.x + shot.radius < 0 ||
+            shot.position.x - shot.radius > CANVAS.width ||
+            shot.position.y + shot.radius < 0 ||
+            shot.position.y - shot.radius > CANVAS.height) {
             setTimeout(() => {
                 shots.splice(index, 1);
             }, 0)
@@ -129,12 +108,13 @@ function animate() {
     enemies.forEach((enemy, index) => {
         enemy.update();
 
-        const distance = Math.hypot(player.x - enemy.x,
-            player.y - enemy.y);
+        const distance = Math.hypot(player.position.x - enemy.x,
+            player.position.y - enemy.y);
 
         // конец игры
         if (distance - enemy.radius - player.radius < 1) {
             playWorking = false;
+            failAudioPlay();
             cancelAnimationFrame(animationId);
             clearInterval(intervalId);
 
@@ -147,8 +127,8 @@ function animate() {
         }
 
         shots.forEach((shot, shotIndex) => {
-            const distance = Math.hypot(shot.x - enemy.x,
-                shot.y - enemy.y);
+            const distance = Math.hypot(shot.position.x - enemy.x,
+                shot.position.y - enemy.y);
 
             // соприкосновение снаряда с врагом
             if (distance - enemy.radius - shot.radius < 1) {
@@ -157,8 +137,8 @@ function animate() {
                 for (let i = 0; i < enemy.radius * 2; i++) {
                     particles.push(
                         new Particle(
-                            shot.x,
-                            shot.y,
+                            shot.position.x,
+                            shot.position.y,
                             Math.random() * 2,
                             enemy.color,
                             {
@@ -199,15 +179,14 @@ function animate() {
 
 addEventListener('click', (event) => {
     const angle = Math.atan2(
-        event.clientY - CANVAS.height / 2,
-        event.clientX - CANVAS.width / 2,
+        event.clientY - player.position.y,
+        event.clientX - player.position.x,
     )
     const velocity = {
         x: Math.cos(angle) * 5,
         y: Math.sin(angle) * 5,
     }
-    shots.push(new Shot(CANVAS.width / 2, CANVAS.height / 2,
-        5, 'white', velocity)
+    shots.push(new Shot(velocity, player.position.x, player.position.y)
     )
     if (playWorking) {
         shotAudioPlay();
